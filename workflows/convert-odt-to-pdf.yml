@@ -1,0 +1,36 @@
+name: Convert ODT to PDF
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  convert:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install LibreOffice
+        run: sudo apt-get update && sudo apt-get install -y libreoffice
+
+      - name: Convert ODT files to PDF (preserve structure)
+        run: |
+          mkdir -p pdf-output
+          find docs i18n -type f -name "*.odt" | while read file; do
+            echo "Converting $file"
+            # Create matching folder in pdf-output
+            outdir="pdf-output/$(dirname "$file")"
+            mkdir -p "$outdir"
+            # Convert and update links
+            libreoffice --headless --update-links --convert-to pdf "$file" --outdir "$outdir"
+          done
+
+      - name: Upload PDFs as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: converted-pdfs
+          path: pdf-output
+
