@@ -16,16 +16,22 @@ jobs:
       - name: Install LibreOffice
         run: sudo apt-get update && sudo apt-get install -y libreoffice
 
-      - name: Convert ODT files to PDF (preserve structure)
+      - name: Install UpdateAllLinks macro
+        run: |
+          mkdir -p ~/.config/libreoffice/4/user/basic/Standard
+          cp macros/Module1.xba ~/.config/libreoffice/4/user/basic/Standard/Module1.xba
+          cp macros/script.xlb ~/.config/libreoffice/4/user/basic/Standard/script.xlb
+
+      - name: Convert ODT files to PDF (update links first)
         run: |
           mkdir -p pdf-output
           find docs i18n -type f -name "*.odt" | while read file; do
+            echo "Updating links for $file"
+            libreoffice --headless --invisible "macro:///Standard.Module1.UpdateAllLinks($PWD/$file)"
             echo "Converting $file"
-            # Create matching folder in pdf-output
             outdir="pdf-output/$(dirname "$file")"
             mkdir -p "$outdir"
-            # Convert and update links
-            libreoffice --headless --update-links --convert-to pdf "$file" --outdir "$outdir"
+            libreoffice --headless --convert-to pdf "$file" --outdir "$outdir"
           done
 
       - name: Upload PDFs as artifact
@@ -33,4 +39,4 @@ jobs:
         with:
           name: converted-pdfs
           path: pdf-output
-
+          
