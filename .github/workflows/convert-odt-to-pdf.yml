@@ -14,8 +14,25 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install LibreOffice
-        run: sudo apt-get update && sudo apt-get install -y libreoffice
+        run: |
+          sudo apt-get update && sudo apt-get install -y libreoffice
+          
+          # Create a fresh user profile directory
+          mkdir -p ~/.config/libreoffice/4/user
 
+          # Inject a config file to force automatic link update
+          cat > ~/.config/libreoffice/4/user/registrymodifications.xcu <<'EOF'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <oor:items xmlns:oor="http://openoffice.org/2001/registry" 
+                     xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+                     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+            <item oor:path="/org.openoffice.Office.Common/Load">
+              <prop oor:name="UpdateDocMode" oor:op="fuse">
+                <value>always</value>
+              </prop>
+            </item>
+          </oor:items>
+          EOF
       - name: Install UpdateAllLinks macro
         run: |
           mkdir -p ~/.config/libreoffice/4/user/basic/Standard
