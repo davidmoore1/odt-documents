@@ -21,13 +21,16 @@ jobs:
           mkdir -p ~/.config/libreoffice/4/user/basic/Standard
           cp macros/Module1.xba ~/.config/libreoffice/4/user/basic/Standard/Module1.xba
           cp macros/script.xlb ~/.config/libreoffice/4/user/basic/Standard/script.xlb
-
+      - name: Update all ODT files
+        run: |
+          find docs i18n -type f -name "*.odt" | while read file; do
+            echo "Updating links in $file"
+            libreoffice --headless --invisible "macro:///Standard.Module1.UpdateAllLinks($PWD/$file)"
+          done
       - name: Convert ODT files to PDF (update links first)
         run: |
           mkdir -p pdf-output
           find docs i18n -type f -name "*.odt" | while read file; do
-            echo "Updating links for $file"
-            libreoffice --headless --invisible "macro:///Standard.Module1.UpdateAllLinks($PWD/$file)"
             echo "Converting $file"
             outdir="pdf-output/$(dirname "$file")"
             mkdir -p "$outdir"
