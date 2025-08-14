@@ -13,27 +13,16 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install LibreOffice
-        run: sudo apt-get update && sudo apt-get install -y libreoffice
-
-      - name: Set LibreOffice update links to Automatic
+      - name: Install LibreOffice Flatpak
         run: |
-          mkdir -p ~/.config/libreoffice/4/user
-          cat <<EOF > ~/.config/libreoffice/4/user/sofficerc
-          [Misc]
-          UpdateLinkMode=2
-          EOF
+          sudo apt-get install -y flatpak
+          flatpak install -y flathub org.libreoffice.LibreOffice
 
-      - name: Install UpdateAllLinks macro
-        run: |
-          mkdir -p ~/.config/libreoffice/4/user/basic/Standard
-          cp macros/Module1.xba ~/.config/libreoffice/4/user/basic/Standard/Module1.xba
-          cp macros/script.xlb ~/.config/libreoffice/4/user/basic/Standard/script.xlb
       - name: Update all ODT files
         run: |
           find docs i18n -type f -name "*.odt" | while read file; do
             echo "Updating links in $file"
-            libreoffice --headless --invisible "macro:///Standard.Module1.UpdateAllLinks($PWD/$file)"
+            flatpak run org.libreoffice.LibreOffice --headless --update-links
           done
       - name: Convert ODT files to PDF (update links first)
         run: |
@@ -42,7 +31,7 @@ jobs:
             echo "Converting $file"
             outdir="pdf-output/$(dirname "$file")"
             mkdir -p "$outdir"
-            libreoffice --headless --convert-to pdf "$file" --outdir "$outdir"
+            flatpak run org.libreoffice.LibreOffice --headless --update-links --convert-to pdf "$file" --outdir "$outdir"
           done
 
       - name: Upload PDFs as artifact
