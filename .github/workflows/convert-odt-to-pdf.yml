@@ -33,7 +33,7 @@ jobs:
 
           # Add the trusted location
           echo '    <item oor:path="/org.openoffice.Office.Common/Security/Scripting">' >> ~/.config/libreoffice/4/user/registrymodifications.xcu
-          echo '        <prop oor:name="SecureURL" oor:op="fuse"><value>file://$TRUSTED_DIR</value></prop>' >> ~/.config/libreoffice/4/user/registrymodifications.xcu
+          echo '        <prop oor:name="SecureURL" oor:op="fuse"><value><it>file://$TRUSTED_DIR</it></value></prop>' >> ~/.config/libreoffice/4/user/registrymodifications.xcu
           echo '    </item>' >> ~/.config/libreoffice/4/user/registrymodifications.xcu
 
           # Add the Writer link update setting
