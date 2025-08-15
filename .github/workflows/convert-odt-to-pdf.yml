@@ -1,3 +1,12 @@
+name: Convert ODT to PDF
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
   convert:
     runs-on: ubuntu-latest
     steps:
