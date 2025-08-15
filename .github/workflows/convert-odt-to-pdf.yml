@@ -1,28 +1,56 @@
-name: Convert ODT to PDF
-
-on:
-  push:
-    branches:
-      - main
-  workflow_dispatch:
-
-jobs:
   convert:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install LibreOffice Flatpak
-        run: |
-          sudo apt-get install -y flatpak
-          flatpak install -y flathub org.libreoffice.LibreOffice
+      - name: Install LibreOffice
+        run: sudo apt-get update && sudo apt-get install -y libreoffice
 
+      - name: Create or Update LibreOffice Config
+        run: |
+          # Define the trusted directory
+          TRUSTED_DIR="$GITHUB_WORKSPACE/my_linked_docs" 
+
+          # Create the LibreOffice user profile directory if it doesn't exist
+          mkdir -p ~/.config/libreoffice/4/user/  # Adjust '4' if using a different major version
+
+          # Create a minimal registrymodifications.xcu with the trusted path and link update setting
+          echo '<?xml version="1.0" encoding="UTF-8"?>' > ~/.config/libreoffice/4/user/registrymodifications.xcu
+          echo '<oor:items xmlns:oor="http://openoffice.org/2001/registry" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">' >> ~/.config/libreoffice/4/user/registrymodifications.xcu
+
+          # Add the Trusted Locations node
+          echo '    <node oor:name="Paths">' >> ~/.config/libreoffice/4/user/registrymodifications.xcu
+          echo '        <node oor:name="Security">' >> ~/.config/libreoffice/4/user/registrymodifications.xcu
+          echo '            <node oor:name="TrustedLocations">' >> ~/.config/libreoffice/4/user/registrymodifications.xcu
+          echo '                <node oor:name="Path1">' >> ~/.config/libreoffice/4/user/registrymodifications.xcu
+          echo "                    <prop oor:name=\"URL\" oor:type=\"xs:string\"><value>file://$TRUSTED_DIR</value></prop>" >> ~/.config/libreoffice/4/user/registrymodifications.xcu
+          echo '                </node>' >> ~/.config/libreoffice/4/user/registrymodifications.xcu
+          echo '            </node>' >> ~/.config/libreoffice/4/user/registrymodifications.xcu
+          echo '        </node>' >> ~/.config/libreoffice/4/user/registrymodifications.xcu
+          echo '    </node>' >> ~/.config/libreoffice/4/user/registrymodifications.xcu
+
+          # Add the Writer General section and UpdateLinksOnLoad setting
+          echo '    <node oor:name="Writer">' >> ~/.config/libreoffice/4/user/registrymodifications.xcu
+          echo '        <node oor:name="General">' >> ~/.config/libreoffice/4/user/registrymodifications.xcu
+          echo '            <prop oor:name="UpdateLinksOnLoad" oor:type="xs:short">' >> ~/.config/libreoffice/4/user/registrymodifications.xcu
+          echo '                <value>2</value>' >> ~/.config/libreoffice/4/user/registrymodifications.xcu
+          echo '            </prop>' >> ~/.config/libreoffice/4/user/registrymodifications.xcu
+          echo '        </node>' >> ~/.config/libreoffice/4/user/registrymodifications.xcu
+          echo '    </node>' >> ~/.config/libreoffice/4/user/registrymodifications.xcu
+
+          echo '</oor:items>' >> ~/.config/libreoffice/4/user/registrymodifications.xcu
+
+      - name: Install libreoffice macros
+        run: |
+          mkdir -p ~/.config/libreoffice/4/user/basic/Standard
+          cp macros/Module1.xba ~/.config/libreoffice/4/user/basic/Standard/Module1.xba
+          cp macros/script.xlb ~/.config/libreoffice/4/user/basic/Standard/script.xlb
       - name: Update all ODT files
         run: |
           find docs i18n -type f -name "*.odt" | while read file; do
             echo "Updating links in $file"
-            flatpak run org.libreoffice.LibreOffice --headless --update-links
+            libreoffice --headless --invisible "macro:///Standard.Module1.SaveAndExitDocument" "$file"
           done
       - name: Convert ODT files to PDF (update links first)
         run: |
@@ -31,7 +59,7 @@ jobs:
             echo "Converting $file"
             outdir="pdf-output/$(dirname "$file")"
             mkdir -p "$outdir"
-            flatpak run org.libreoffice.LibreOffice --headless --update-links --convert-to pdf "$file" --outdir "$outdir"
+            libreoffice --headless --convert-to pdf "$file" --outdir "$outdir"
           done
 
       - name: Upload PDFs as artifact
