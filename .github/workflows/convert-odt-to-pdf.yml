@@ -21,6 +21,8 @@ jobs:
           # Define the trusted directory
           TRUSTED_DIR="$GITHUB_WORKSPACE" 
 
+          echo $TRUSTED_DIR
+
           # Create the LibreOffice user profile directory if it doesn't exist
           mkdir -p ~/.config/libreoffice/4/user/  # Adjust '4' if using a different major version
 
@@ -28,25 +30,15 @@ jobs:
           echo '<?xml version="1.0" encoding="UTF-8"?>' > ~/.config/libreoffice/4/user/registrymodifications.xcu
           echo '<oor:items xmlns:oor="http://openoffice.org/2001/registry" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">' >> ~/.config/libreoffice/4/user/registrymodifications.xcu
 
-          # Add the Trusted Locations node
-          echo '    <node oor:name="Paths">' >> ~/.config/libreoffice/4/user/registrymodifications.xcu
-          echo '        <node oor:name="Security">' >> ~/.config/libreoffice/4/user/registrymodifications.xcu
-          echo '            <node oor:name="TrustedLocations">' >> ~/.config/libreoffice/4/user/registrymodifications.xcu
-          echo '                <node oor:name="Path1">' >> ~/.config/libreoffice/4/user/registrymodifications.xcu
-          echo "                    <prop oor:name=\"URL\" oor:type=\"xs:string\"><value>file://$TRUSTED_DIR</value></prop>" >> ~/.config/libreoffice/4/user/registrymodifications.xcu
-          echo '                </node>' >> ~/.config/libreoffice/4/user/registrymodifications.xcu
-          echo '            </node>' >> ~/.config/libreoffice/4/user/registrymodifications.xcu
-          echo '        </node>' >> ~/.config/libreoffice/4/user/registrymodifications.xcu
-          echo '    </node>' >> ~/.config/libreoffice/4/user/registrymodifications.xcu
+          # Add the trusted location
+          echo '    <item oor:path="/org.openoffice.Office.Common/Security/Scripting">' >> ~/.config/libreoffice/4/user/registrymodifications.xcu
+          echo '        <prop oor:name="SecureURL" oor:op="fuse"><value>file://$TRUSTED_DIR</value></prop>' >> ~/.config/libreoffice/4/user/registrymodifications.xcu
+          echo '    </item>' >> ~/.config/libreoffice/4/user/registrymodifications.xcu
 
-          # Add the Writer General section and UpdateLinksOnLoad setting
-          echo '    <node oor:name="Writer">' >> ~/.config/libreoffice/4/user/registrymodifications.xcu
-          echo '        <node oor:name="General">' >> ~/.config/libreoffice/4/user/registrymodifications.xcu
-          echo '            <prop oor:name="UpdateLinksOnLoad" oor:type="xs:short">' >> ~/.config/libreoffice/4/user/registrymodifications.xcu
-          echo '                <value>2</value>' >> ~/.config/libreoffice/4/user/registrymodifications.xcu
-          echo '            </prop>' >> ~/.config/libreoffice/4/user/registrymodifications.xcu
-          echo '        </node>' >> ~/.config/libreoffice/4/user/registrymodifications.xcu
-          echo '    </node>' >> ~/.config/libreoffice/4/user/registrymodifications.xcu
+          # Add the Writer link update setting
+          echo '    <item oor:path="/org.openoffice.Office.Writer/Content/Update">' >> ~/.config/libreoffice/4/user/registrymodifications.xcu
+          echo '        <prop oor:name="Link" oor:op="fuse"><value>2</value></prop>' >> ~/.config/libreoffice/4/user/registrymodifications.xcu
+          echo '    </item>' >> ~/.config/libreoffice/4/user/registrymodifications.xcu
 
           echo '</oor:items>' >> ~/.config/libreoffice/4/user/registrymodifications.xcu
           
