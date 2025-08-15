@@ -19,7 +19,7 @@ jobs:
       - name: Create or Update LibreOffice Config
         run: |
           # Define the trusted directory
-          TRUSTED_DIR="$GITHUB_WORKSPACE/my_linked_docs" 
+          TRUSTED_DIR="$GITHUB_WORKSPACE" 
 
           # Create the LibreOffice user profile directory if it doesn't exist
           mkdir -p ~/.config/libreoffice/4/user/  # Adjust '4' if using a different major version
@@ -49,6 +49,8 @@ jobs:
           echo '    </node>' >> ~/.config/libreoffice/4/user/registrymodifications.xcu
 
           echo '</oor:items>' >> ~/.config/libreoffice/4/user/registrymodifications.xcu
+          
+          cat ~/.config/libreoffice/4/user/registrymodifications.xcu
 
       - name: Install libreoffice macros
         run: |
