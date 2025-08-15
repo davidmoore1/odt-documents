@@ -22,6 +22,7 @@ jobs:
           TRUSTED_DIR="$GITHUB_WORKSPACE" 
 
           echo $TRUSTED_DIR
+          ls -R $TRUSTED_DIR
 
           # Create the LibreOffice user profile directory if it doesn't exist
           mkdir -p ~/.config/libreoffice/4/user/  # Adjust '4' if using a different major version
