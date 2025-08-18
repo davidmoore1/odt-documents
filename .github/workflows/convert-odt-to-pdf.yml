@@ -16,7 +16,7 @@ jobs:
       - name: Install LibreOffice
         run: sudo apt-get update && sudo apt-get install -y libreoffice
 
-      - name: Convert ODT files to PDF (update links first)
+      - name: Start libreoffice once
         run: |
           mkdir -p dummy
           find docs i18n -type f -name "*.odt" | while read file; do
@@ -24,19 +24,13 @@ jobs:
             outdir="dummy/$(dirname "$file")"
             mkdir -p "$outdir"
             libreoffice --headless --convert-to pdf "$file" --outdir "$outdir"
+            break
           done
           
       - name: Create or Update LibreOffice Config
         run: |
           # Define the trusted directory
-          TRUSTED_DIR="$GITHUB_WORKSPACE" 
-
-          echo $TRUSTED_DIR
-          ls -R $TRUSTED_DIR
-          ls ~/.config
-          ls ~/.config/libreoffice
-          ls ~/.config/libreoffice/4
-          ls ~/.config/libreoffice/4/user
+          cat ~/.config/libreoffice/4/user/registrymodifications.xcu
           pwd
           
           # Create the LibreOffice user profile directory if it doesn't exist
@@ -49,13 +43,15 @@ jobs:
           mkdir -p ~/.config/libreoffice/4/user/basic/Standard
           cp macros/Module1.xba ~/.config/libreoffice/4/user/basic/Standard/Module1.xba
           cp macros/script.xlb ~/.config/libreoffice/4/user/basic/Standard/script.xlb
-      - name: Update all ODT files
+          
+      - name: Update all ODT file links
         run: |
           find docs i18n -type f -name "*.odt" | while read file; do
             echo "Updating links in $file"
             libreoffice --headless --invisible "macro:///Standard.Module1.SaveAndExitDocument" "$file"
           done
-      - name: Convert ODT files to PDF (update links first)
+          
+      - name: Convert ODT files to PDF
         run: |
           mkdir -p pdf-output
           find docs i18n -type f -name "*.odt" | while read file; do
