@@ -37,11 +37,11 @@ jobs:
           ls ~/.config/libreoffice
           ls ~/.config/libreoffice/4
           ls ~/.config/libreoffice/4/user
-
+          pwd
+          
           # Create the LibreOffice user profile directory if it doesn't exist
           mkdir -p ~/.config/libreoffice/4/user/  # Adjust '4' if using a different major version
-
-          cp -f config/registrymodications.xcu ~/.config/libreoffice/4/user          
+          cp -f $GITHUB_WORKSPACE/config/registrymodications.xcu ~/.config/libreoffice/4/user          
           cat ~/.config/libreoffice/4/user/registrymodifications.xcu
 
       - name: Install libreoffice macros
