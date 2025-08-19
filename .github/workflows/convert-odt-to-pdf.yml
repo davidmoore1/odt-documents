@@ -42,7 +42,7 @@ jobs:
           done
       - name: Make i18n writable
         run: |
-         chmod -R u+w ./i18n
+         sudo chown -R $USER:$USER ./i18n
          ls -lR .
          
       - name: Create or Update LibreOffice Config
