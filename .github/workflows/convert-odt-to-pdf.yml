@@ -32,7 +32,7 @@ jobs:
         run: |
           mkdir -p dummy
           pwd
-          ls -R .
+          ls -lR .
           find docs i18n -type f -name "*.odt" | while read file; do
             echo "Converting $file"
             outdir="dummy/$(dirname "$file")"
@@ -40,7 +40,11 @@ jobs:
             libreoffice --headless --convert-to pdf "$file" --outdir "$outdir"
             # break
           done
-          
+      - name: Make i18n writable
+        run: |
+         chmod -R u+w ./i18n
+         ls -lR .
+         
       - name: Create or Update LibreOffice Config
         run: |
           # Define the trusted directory
