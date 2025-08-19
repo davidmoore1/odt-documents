@@ -38,7 +38,7 @@ jobs:
             outdir="dummy/$(dirname "$file")"
             mkdir -p "$outdir"
             libreoffice --headless --convert-to pdf "$file" --outdir "$outdir"
-            break
+            # break
           done
           
       - name: Create or Update LibreOffice Config
@@ -72,7 +72,7 @@ jobs:
             echo "Converting $file"
             outdir="pdf-output/$(dirname "$file")"
             mkdir -p "$outdir"
-            libreoffice --headless --convert-to pdf "$file" --outdir "$outdir"
+            timeout 60s libreoffice --headless --convert-to pdf "$file" --outdir "$outdir"
           done
 
       - name: Upload PDFs as artifact
