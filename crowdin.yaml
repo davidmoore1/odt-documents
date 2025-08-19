@@ -1,0 +1,7 @@
+project_id: "821352"
+api_token_env: CROWDIN_PERSONAL_TOKEN
+
+"files":
+  - source: /docs/**/*.docx
+    translation: /i18n/%locale%/**/%original_file_name%
+
