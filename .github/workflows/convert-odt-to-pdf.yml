@@ -31,16 +31,14 @@ jobs:
       - name: Start libreoffice once
         run: |
           mkdir -p dummy
-          pwd
-          ls -lR .
           find docs i18n -type f -name "*.odt" | while read file; do
             echo "Converting $file"
             outdir="dummy/$(dirname "$file")"
             mkdir -p "$outdir"
             libreoffice --headless --convert-to pdf "$file" --outdir "$outdir"
-            # break
+            break
           done
-      - name: Make i18n writable
+      - name: Change i18n owner so writable
         run: |
          sudo chown -R $USER:$USER ./i18n
          ls -lR .
@@ -66,7 +64,7 @@ jobs:
         run: |
           find docs i18n -type f -name "*.odt" | while read file; do
             echo "Updating links in $file"
-            libreoffice --headless --invisible "macro:///Standard.Module1.SaveAndExitDocument" "$file"
+            timeout 60s libreoffice --headless --invisible "macro:///Standard.Module1.SaveAndExitDocument" "$file"
           done
           
       - name: Convert ODT files to PDF
